@@ -2,8 +2,10 @@ using AmbientWeatherDashboard.Core.Models;
 
 namespace AmbientWeatherDashboard.Tests;
 
+/// <summary>驗證溫度、風速、角度、紫外線、濕度與日照時間計算。</summary>
 public sealed class WeatherMathTests
 {
+    /// <summary>檢查攝氏轉換、風速單位及估算光照指數的結果。</summary>
     [Fact]
     public void ConvertsTemperatureWindSpeedAndEstimatedLight()
     {
@@ -16,6 +18,7 @@ public sealed class WeatherMathTests
         Assert.Equal(100, WeatherMath.LightIndex(1300));
     }
 
+    /// <summary>檢查羅盤角度沿順時針或逆時針的最短方向轉動。</summary>
     [Theory]
     [InlineData(350, 10, 20)]
     [InlineData(10, 350, -20)]
@@ -26,6 +29,7 @@ public sealed class WeatherMathTests
         Assert.Equal(to, WeatherMath.NormalizeDegrees(from + delta));
     }
 
+    /// <summary>檢查濕度百分比裁切後對應的圓弧角度。</summary>
     [Theory]
     [InlineData(-3, 0)]
     [InlineData(0, 0)]
@@ -34,6 +38,7 @@ public sealed class WeatherMathTests
     [InlineData(101, 360)]
     public void HumidityArcSupportsFullRange(double value, double sweep) => Assert.Equal(sweep, WeatherMath.HumiditySweep(value));
 
+    /// <summary>檢查紫外線指數門檻對應的級別。</summary>
     [Theory]
     [InlineData(2.9, 0)]
     [InlineData(3, 1)]
@@ -42,6 +47,7 @@ public sealed class WeatherMathTests
     [InlineData(11, 4)]
     public void ClassifiesUv(double value, int level) => Assert.Equal(level, WeatherMath.UvLevel(value));
 
+    /// <summary>檢查日照弧線、經過比例及 API 提供的日照秒數。</summary>
     [Fact]
     public void DayArcAndElapsedProgressUseLocalTimeAndApiDaylightDuration()
     {
@@ -61,6 +67,7 @@ public sealed class WeatherMathTests
         Assert.Equal(43200, WeatherMath.SunCycle(rise, day with { DaylightSeconds = null }, TimeZoneInfo.Utc).Seconds);
     }
 
+    /// <summary>檢查跨午夜日照、相鄰日期選擇與極晝極夜資料。</summary>
     [Fact]
     public void SupportsCrossMidnightAndPolarDays()
     {
@@ -88,6 +95,7 @@ public sealed class WeatherMathTests
         Assert.Null(polarNight.Sunset);
     }
 
+    /// <summary>檢查日出早於本地午夜時使用隔日資料列的日照週期。</summary>
     [Fact]
     public void UsesTomorrowRowWhenTheSunRisesBeforeLocalMidnight()
     {
@@ -99,6 +107,7 @@ public sealed class WeatherMathTests
         Assert.Equal(1d / 22, cycle.Progress!.Value, 10);
     }
 
+    /// <summary>檢查夏令時間切換附近以本地日期和小時尋找昨日預報。</summary>
     [Fact]
     public void SameLocalHourUsesPreviousCalendarDateAndHandlesDst()
     {
@@ -116,6 +125,7 @@ public sealed class WeatherMathTests
         Assert.Equal(date.AddDays(1), DateOnly.FromDateTime(WeatherMath.Local(beforeMidnightUtc, taipei).DateTime));
     }
 
+    /// <summary>檢查秋季時鐘回撥造成重複小時時優先選擇相同 UTC 偏移。</summary>
     [Fact]
     public void AmbiguousPreviousDayHourPrefersMatchingUtcOffset()
     {
@@ -127,8 +137,10 @@ public sealed class WeatherMathTests
         Assert.Equal(late, WeatherMath.SameHourYesterday(new[] { Sample(early), Sample(late) }, tomorrow, zone)?.Time);
     }
 
+    /// <summary>以指定日期及小時建立 UTC 測試時間。</summary>
     private static DateTimeOffset At(DateOnly date, int hour) =>
         new(date.ToDateTime(new TimeOnly(hour, 0)), TimeSpan.Zero);
 
+    /// <summary>建立只設定時間與濕度的逐時預報測試資料。</summary>
     private static HourlyForecast Sample(DateTimeOffset time) => new(time, null, 70, null, null, null, null, null);
 }

@@ -4,8 +4,10 @@ using static AmbientWeatherDashboard.Core.Services.OpenMeteoParser;
 
 namespace AmbientWeatherDashboard.Core.Services;
 
+/// <summary>透過 Open-Meteo 地理編碼 API 搜尋並驗證地點資料。</summary>
 public sealed class GeocodingService(HttpClient client)
 {
+    /// <summary>查詢最多 10 個地點結果，略過資料無效項目並按座標去重。</summary>
     public async Task<IReadOnlyList<LocationInfo>> SearchAsync(string query, bool traditionalChinese, CancellationToken cancellationToken)
     {
         var name = query.Trim();
@@ -40,6 +42,7 @@ public sealed class GeocodingService(HttpClient client)
         return locations.DistinctBy(location => location.CoordinateKey).ToArray();
     }
 
+    /// <summary>從 JSON 物件讀取指定字串欄位，欄位缺少或不是字串時回傳 null。</summary>
     private static string? ReadText(JsonElement entry, string property)
     {
         var value = Member(entry, property);

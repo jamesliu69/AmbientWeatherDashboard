@@ -3,8 +3,10 @@ using AmbientWeatherDashboard.Core.Services;
 
 namespace AmbientWeatherDashboard.Tests;
 
+/// <summary>驗證 Open-Meteo JSON 對目前天氣、逐時與逐日資料的解析結果。</summary>
 public sealed class OpenMeteoParserTests
 {
+    /// <summary>檢查目前值、逐時序列索引、單位與每日資料欄位的解析。</summary>
     [Fact]
     public void ParsesCurrentHourlyAndDailySeriesWithCorrectUnitsAndIndexAlignment()
     {
@@ -35,6 +37,7 @@ public sealed class OpenMeteoParserTests
         Assert.Equal(4.5, snapshot.Daily[1].MaxUv);
     }
 
+    /// <summary>檢查跨越每日資料列民用日期的日出時間仍被保留。</summary>
     [Fact]
     public void AcceptsRiseAndSetEventsOutsideTheCivilDateOfTheirDailyRow()
     {
@@ -45,6 +48,7 @@ public sealed class OpenMeteoParserTests
         Assert.Equal(boundary.AddHours(-4), snapshot.Daily[1].Sunrise);
     }
 
+    /// <summary>檢查分數時區偏移對齊逐時預報時間，不改變目前時間及已對齊資料。</summary>
     [Theory]
     [InlineData("Asia/Kathmandu", 20700, -45)]
     [InlineData("America/St_Johns", -12600, 30)]
@@ -65,6 +69,7 @@ public sealed class OpenMeteoParserTests
         Assert.Equal(sample.AddHours(1), snapshot.Hourly[1].Time);
     }
 
+    /// <summary>檢查無效濕度會被略過，其他有效測量值仍保留。</summary>
     [Theory]
     [InlineData("null")]
     [InlineData("-1")]
@@ -80,6 +85,7 @@ public sealed class OpenMeteoParserTests
         Assert.Null(snapshot.Hourly[2].Humidity);
     }
 
+    /// <summary>檢查 API 偏移會漏掉本地日資料時，改以完整逐時資料重算最高溫與 UV 峰值。</summary>
     [Fact]
     public void RecomputesDailyPeaksWhenTheApiOffsetWouldOmitPartOfTheCivilDay()
     {
@@ -110,6 +116,7 @@ public sealed class OpenMeteoParserTests
         Assert.Equal(6, daily.MaxUv);
     }
 
+    /// <summary>檢查缺少選用逐時及逐日序列時回傳空集合與空測量值。</summary>
     [Fact]
     public void MissingOptionalSeriesStayEmpty()
     {
@@ -124,6 +131,7 @@ public sealed class OpenMeteoParserTests
         Assert.Null(snapshot.Current.WindSpeed);
     }
 
+    /// <summary>檢查超出更新時窗的時間戳記與無法辨識的 JSON 會被拒絕。</summary>
     [Fact]
     public void InvalidTimestampOrUnrecognizablePayloadIsRejected()
     {

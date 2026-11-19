@@ -4,8 +4,10 @@ using AmbientWeatherDashboard.Core.Services;
 
 namespace AmbientWeatherDashboard.Tests;
 
+/// <summary>驗證天氣更新共用、取消、失敗重試與快取回復流程。</summary>
 public sealed class WeatherRefreshTests
 {
+    /// <summary>檢查同地點請求共用一次 HTTP 工作，加入者取消不會取消擁有者。</summary>
     [Fact]
     public async Task ConcurrentRefreshesShareOneRequestAndCancelingAJoinerDoesNotStopTheOwner()
     {
@@ -35,6 +37,7 @@ public sealed class WeatherRefreshTests
         Assert.Equal(1, requests);
     }
 
+    /// <summary>檢查取消擁有者會終止 HTTP 工作，後續更新仍能重新發出請求。</summary>
     [Fact]
     public async Task CancelingTheOwnerAbortsHttpAndAllowsTheNextRefresh()
     {
@@ -71,6 +74,7 @@ public sealed class WeatherRefreshTests
         Assert.Equal(2, count);
     }
 
+    /// <summary>檢查網路中斷時使用最近快取，服務恢復後可再次取得新資料。</summary>
     [Fact]
     public async Task NetworkFailureUsesLastGoodDataAndRefetchesAfterRecovery()
     {
@@ -101,6 +105,7 @@ public sealed class WeatherRefreshTests
         Assert.True((await service.RefreshAsync(LocationInfo.Taipei, timeout.Token)).Connected);
     }
 
+    /// <summary>檢查永久性 HTTP 錯誤不會重試。</summary>
     [Fact]
     public async Task PermanentHttpErrorsDoNotRetry()
     {
@@ -116,9 +121,11 @@ public sealed class WeatherRefreshTests
         Assert.Equal(1, requests);
     }
 
+    /// <summary>以測試 HTTP 用戶端與暫存快取建立天氣更新服務。</summary>
     private static WeatherRefreshService Create(HttpClient client, TempDirectory temp) =>
         new(new OpenMeteoService(client, new FixedClock()), new WeatherCacheService(temp.Path));
 
+    /// <summary>以成功狀態碼及共用預報 JSON 建立 HTTP 回應。</summary>
     private static HttpResponseMessage ForecastResponse() =>
         new(HttpStatusCode.OK) { Content = new StringContent(ForecastFixture.Json()) };
 }

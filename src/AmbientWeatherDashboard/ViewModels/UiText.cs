@@ -2,6 +2,7 @@ using System.Globalization;
 
 namespace AmbientWeatherDashboard.ViewModels;
 
+/// <summary>依介面語言提供本地化文字、天氣狀況及時長格式化結果。</summary>
 public sealed class UiText(bool chinese)
 {
     public bool IsChinese => chinese;
@@ -79,6 +80,7 @@ public sealed class UiText(bool chinese)
     public string PolarDay => Pick("Polar day", "永晝");
     public string PolarNight => Pick("Polar night", "極夜");
 
+    /// <summary>依紫外線級別回傳對應的英文或繁體中文名稱。</summary>
     public string UvLevel(int level) => level switch
     {
         0 => Pick("Low", "低量級"),
@@ -88,6 +90,7 @@ public sealed class UiText(bool chinese)
         _ => Pick("Extreme", "危險級")
     };
 
+    /// <summary>依天氣代碼與白晝狀態組合目前天氣描述。</summary>
     public string Condition(int? weatherCode, bool? daylight)
     {
         var description = weatherCode switch
@@ -104,6 +107,7 @@ public sealed class UiText(bool chinese)
         return weatherCode is <= 2 && daylight is { } isDay ? $"{description} · {(isDay ? Day : Night)}" : description;
     }
 
+    /// <summary>將日照秒數格式化為本地語言的時長，並處理永晝與極夜。</summary>
     public string DaylightDuration(double seconds)
     {
         if (seconds == 86400)
@@ -114,8 +118,10 @@ public sealed class UiText(bool chinese)
         return chinese ? $"{minutes / 60} 小時 {minutes % 60} 分" : $"{minutes / 60} hr {minutes % 60} min";
     }
 
+    /// <summary>依介面語言格式化相對濕度差的百分點文字。</summary>
     public string PercentagePoints(double value) =>
         value.ToString("+0;-0;0", Culture) + Pick(" pp", " 個百分點");
 
+    /// <summary>依目前語言選取英文或繁體中文文字。</summary>
     private string Pick(string english, string traditionalChinese) => chinese ? traditionalChinese : english;
 }

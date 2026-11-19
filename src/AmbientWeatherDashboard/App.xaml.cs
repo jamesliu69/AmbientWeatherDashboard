@@ -7,10 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AmbientWeatherDashboard;
 
+/// <summary>建立應用程式服務及主視窗，並在結束時釋放服務提供者。</summary>
 public partial class App : Application
 {
+    /// <summary>保存應用程式啟動時建立的相依性服務提供者。</summary>
     private ServiceProvider? services;
 
+    /// <summary>註冊應用程式服務與 ViewModel，建立相依性容器並顯示主視窗。</summary>
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -41,11 +44,13 @@ public partial class App : Application
         MainWindow.Show();
     }
 
+    /// <summary>建立連線池生命週期為五分鐘的 SocketsHttpHandler。</summary>
     private static SocketsHttpHandler CreateHandler() => new()
     {
         PooledConnectionLifetime = TimeSpan.FromMinutes(5)
     };
 
+    /// <summary>釋放相依性服務提供者，再交由 WPF 執行基底結束處理。</summary>
     protected override void OnExit(ExitEventArgs e)
     {
         services?.Dispose();

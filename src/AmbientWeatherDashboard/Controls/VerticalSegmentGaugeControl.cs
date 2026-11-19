@@ -3,20 +3,26 @@ using System.Windows.Media;
 
 namespace AmbientWeatherDashboard.Controls;
 
+/// <summary>以垂直圓角分段及透明度呈現指定範圍內的數值。</summary>
 public sealed class VerticalSegmentGaugeControl : VectorControl
 {
+    /// <summary>供繫結設定儀表數值下限的相依屬性。</summary>
     public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
         nameof(Minimum), typeof(double), typeof(VerticalSegmentGaugeControl), Render(0d));
 
+    /// <summary>供繫結設定儀表數值上限的相依屬性。</summary>
     public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(
         nameof(Maximum), typeof(double), typeof(VerticalSegmentGaugeControl), Render(100d));
 
+    /// <summary>供繫結設定儀表分段數量的相依屬性。</summary>
     public static readonly DependencyProperty SegmentCountProperty = DependencyProperty.Register(
         nameof(SegmentCount), typeof(int), typeof(VerticalSegmentGaugeControl), Render(9));
 
+    /// <summary>供繫結設定各分段強調色的相依屬性。</summary>
     public static readonly DependencyProperty AccentProperty = DependencyProperty.Register(
         nameof(Accent), typeof(Brush), typeof(VerticalSegmentGaugeControl), Render(DialDrawing.Gold));
 
+    /// <summary>供自動化說明數值單位的相依屬性。</summary>
     public static readonly DependencyProperty UnitProperty = DependencyProperty.Register(
         nameof(Unit), typeof(string), typeof(VerticalSegmentGaugeControl), Render(string.Empty));
 
@@ -28,6 +34,7 @@ public sealed class VerticalSegmentGaugeControl : VectorControl
 
     protected override Size DrawingSize => new(50, 130);
 
+    /// <summary>依數值在上下限間的位置繪製填入程度不同的分段。</summary>
     protected override void Draw(DrawingContext context)
     {
         var count = Math.Clamp(SegmentCount, 1, 24);

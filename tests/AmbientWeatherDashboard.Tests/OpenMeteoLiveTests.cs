@@ -3,8 +3,10 @@ using AmbientWeatherDashboard.Core.Services;
 
 namespace AmbientWeatherDashboard.Tests;
 
+/// <summary>透過真實 Open-Meteo 服務檢查地點搜尋、預報與快取流程。</summary>
 public sealed class OpenMeteoLiveTests
 {
+    /// <summary>搜尋臺北並透過更新服務取得真實預報，再確認資料與快取欄位。</summary>
     [Fact]
     [Trait("Category", "Live")]
     public async Task SearchesTaipeiAndLoadsRealForecastThroughTheRefreshService()

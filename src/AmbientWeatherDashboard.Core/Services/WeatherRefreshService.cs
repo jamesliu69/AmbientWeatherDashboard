@@ -4,12 +4,17 @@ using AmbientWeatherDashboard.Core.Models;
 
 namespace AmbientWeatherDashboard.Core.Services;
 
+/// <summary>協調相同地點的共用更新請求，並在天氣更新失敗時載入快取資料。</summary>
 public sealed class WeatherRefreshService(OpenMeteoService weather, WeatherCacheService cache)
 {
+    /// <summary>保護待處理更新工作與其地點鍵的共用狀態。</summary>
     private readonly object sync = new();
+    /// <summary>目前共用中的天氣更新工作。</summary>
     private Task<RefreshResult>? pending;
+    /// <summary>目前共用更新工作的地點座標鍵。</summary>
     private string? pendingLocation;
 
+    /// <summary>同地點呼叫共用更新工作；不同地點等待現有工作結束後再發出更新。</summary>
     public async Task<RefreshResult> RefreshAsync(LocationInfo location, CancellationToken cancellationToken)
     {
         while (true)
@@ -40,6 +45,7 @@ public sealed class WeatherRefreshService(OpenMeteoService weather, WeatherCache
         }
     }
 
+    /// <summary>天氣資料取得失敗時載入快取；快取寫入失敗時仍回傳已取得的快照。</summary>
     private async Task<RefreshResult> FetchAsync(LocationInfo location, CancellationToken cancellationToken)
     {
         WeatherPayload payload;

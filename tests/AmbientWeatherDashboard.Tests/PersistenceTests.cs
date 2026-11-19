@@ -3,8 +3,10 @@ using AmbientWeatherDashboard.Core.Services;
 
 namespace AmbientWeatherDashboard.Tests;
 
+/// <summary>驗證設定與天氣快取的讀寫、資料損壞處理及取消保護。</summary>
 public sealed class PersistenceTests
 {
+    /// <summary>檢查設定往返保存，並確認損壞設定會回復至預設位置。</summary>
     [Fact]
     public async Task SettingsRoundTripAndCorruptSettingsFallBackToDefaults()
     {
@@ -20,6 +22,7 @@ public sealed class PersistenceTests
         Assert.Equal(AppSettings.Default, await service.LoadAsync(default));
     }
 
+    /// <summary>檢查快取保留有效天氣資料、隔離地點並拒絕損壞內容。</summary>
     [Fact]
     public async Task WeatherCacheKeepsLastValidResponsePerLocationAndHandlesCorruption()
     {
@@ -42,6 +45,7 @@ public sealed class PersistenceTests
         Assert.Null(await cache.LoadAsync(location, default));
     }
 
+    /// <summary>檢查取消設定寫入時原有檔案仍可讀取且不被取代。</summary>
     [Fact]
     public async Task CanceledSettingsWriteKeepsPreviousFile()
     {

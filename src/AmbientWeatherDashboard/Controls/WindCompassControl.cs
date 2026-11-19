@@ -4,17 +4,25 @@ using static AmbientWeatherDashboard.Controls.DialDrawing;
 
 namespace AmbientWeatherDashboard.Controls;
 
+/// <summary>以羅盤刻度和指針呈現風向，並在中心顯示風速與單位。</summary>
 public sealed class WindCompassControl : VectorControl
 {
+    /// <summary>羅盤刻度盤的中心座標。</summary>
     private static readonly Point Center = new(120, 120);
+    /// <summary>羅盤內圈的描邊。</summary>
     private static readonly Pen Inner = Pen(Brush("#80BCD7"), 4);
+    /// <summary>羅盤周圍刻度線的描邊。</summary>
     private static readonly Pen Tick = Pen(Brush("#4679A9"), 3.6);
+    /// <summary>預先繪製的羅盤圓環與刻度。</summary>
     private static readonly Drawing Dial = CreateDial();
+    /// <summary>表示目前風向的指針外形。</summary>
     private static readonly Geometry Pointer = Geometry("M120,29 L105,3 Q104,0 108,0 L132,0 Q136,0 135,3 Z");
 
+    /// <summary>供繫結設定羅盤中心風速文字的相依屬性。</summary>
     public static readonly DependencyProperty SpeedProperty = DependencyProperty.Register(
         nameof(Speed), typeof(string), typeof(WindCompassControl), Render("—"));
 
+    /// <summary>供繫結設定風速單位文字的相依屬性。</summary>
     public static readonly DependencyProperty UnitProperty = DependencyProperty.Register(
         nameof(Unit), typeof(string), typeof(WindCompassControl), Render("KM/H"));
 
@@ -23,12 +31,14 @@ public sealed class WindCompassControl : VectorControl
 
     protected override Size DrawingSize => new(240, 240);
 
+    /// <summary>讓指針沿角度差最短的方向轉到新的風向。</summary>
     protected override double Target(double value)
     {
         var delta = AmbientWeatherDashboard.Core.Models.WeatherMath.ShortestTurn(DisplayValue, value);
         return DisplayValue + delta;
     }
 
+    /// <summary>繪製羅盤、風速文字，以及目前風向指針。</summary>
     protected override void Draw(DrawingContext context)
     {
         context.DrawDrawing(Dial);
@@ -48,6 +58,7 @@ public sealed class WindCompassControl : VectorControl
         }
     }
 
+    /// <summary>建立並凍結包含圓環和方向刻度的羅盤底圖。</summary>
     private static Drawing CreateDial()
     {
         var drawing = new DrawingGroup();

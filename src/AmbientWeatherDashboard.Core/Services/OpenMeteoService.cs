@@ -3,8 +3,10 @@ using AmbientWeatherDashboard.Core.Models;
 
 namespace AmbientWeatherDashboard.Core.Services;
 
+/// <summary>向 Open-Meteo 天氣 API 擷取指定地點的目前天氣與預報資料。</summary>
 public sealed class OpenMeteoService(HttpClient client, TimeProvider clock)
 {
+    /// <summary>驗證地點後下載 API JSON，並連同擷取時間與解析結果回傳。</summary>
     public async Task<WeatherPayload> GetAsync(LocationInfo location, CancellationToken cancellationToken)
     {
         if (!location.IsValid)

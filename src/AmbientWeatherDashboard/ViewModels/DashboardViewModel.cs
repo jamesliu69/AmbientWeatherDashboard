@@ -8,28 +8,46 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace AmbientWeatherDashboard.ViewModels;
 
+/// <summary>管理目前天氣、逐時預報、日照指標及儀表板顯示狀態。</summary>
 public sealed partial class DashboardViewModel(WeatherRefreshService refresh, WeatherCacheService cache, TimeProvider clock)
     : ObservableObject
 {
+    /// <summary>在畫面沒有可用測量值時顯示的佔位文字。</summary>
     private const string Missing = "—";
+    /// <summary>目前套用至儀表板的使用者偏好。</summary>
     private AppSettings settings = AppSettings.Default;
+    /// <summary>目前顯示的天氣快照。</summary>
     private WeatherSnapshot? weather;
+    /// <summary>目前地點的時區，用於日期、時間與日照計算。</summary>
     private TimeZoneInfo zone = WeatherMath.FindZone(AppSettings.Default.Location.TimeZone)!;
+    /// <summary>控制週期更新和手動更新生命週期的取消來源。</summary>
     private CancellationTokenSource? lifetime;
+    /// <summary>執行初次與定期天氣更新的背景工作。</summary>
     private Task? refreshLoop;
+    /// <summary>供週期更新與手動命令共用的單次更新工作。</summary>
     private Task? pendingRefresh;
+    /// <summary>記錄時鐘最近一次顯示的分鐘邊界，避免同一分鐘重複整理畫面。</summary>
     private DateTimeOffset displayMinute;
+    /// <summary>記錄儀表板目前是否最小化。</summary>
     private bool minimized;
+    /// <summary>記錄最近一次更新結果的連線狀態。</summary>
     private bool connected;
+    /// <summary>記錄目前是否有天氣更新工作進行中。</summary>
     private bool updating;
+    /// <summary>記錄最近一次天氣快取寫入是否失敗。</summary>
     private bool cacheWriteFailed;
+    /// <summary>保存最近一次更新錯誤訊息。</summary>
     private string? failure;
 
+    /// <summary>保存畫面目前顯示的逐時預報項目。</summary>
     public ObservableCollection<ForecastTile> Forecast { get; } = [];
     public Visibility NoForecastVisibility => Forecast.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
+    /// <summary>顯示目前輻射值與今日峰值的太陽輻射指標。</summary>
     public SunMetricViewModel SolarMetric { get; } = new(1000, DialDrawing.Gold, "W/m²");
+    /// <summary>顯示目前紫外線指數與級別的指標。</summary>
     public SunMetricViewModel UvMetric { get; } = new(11, DialDrawing.Violet, "");
+    /// <summary>以 0 至 100 相對尺度顯示估計光照的指標。</summary>
     public SunMetricViewModel LightMetric { get; } = new(100, DialDrawing.Ice, "/ 100");
 
     public string WindUnit => settings.MilesPerHour ? "MPH" : "KM/H";
@@ -47,29 +65,52 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         ? $"{Text.LastUpdated} · {WeatherMath.Local(snapshot.FetchedAt, zone).ToString("yyyy-MM-dd HH:mm", Text.Culture)}"
         : "";
 
+    /// <summary>保存介面目前語言對應的文字資源。</summary>
     [ObservableProperty] private UiText text = new(false);
+    /// <summary>保存地點時區中的本地日期文字。</summary>
     [ObservableProperty] private string localDate = "";
+    /// <summary>保存地點時區中的時鐘文字。</summary>
     [ObservableProperty] private string clockText = "--:--";
+    /// <summary>保存目前風向角度；無風或資料缺少時為 null。</summary>
     [ObservableProperty] private double? windDirection;
+    /// <summary>保存依設定單位格式化的目前風速。</summary>
     [ObservableProperty] private string windSpeed = Missing;
+    /// <summary>保存依設定單位格式化的目前陣風速度。</summary>
     [ObservableProperty] private string gust = Missing;
+    /// <summary>保存目前相對濕度百分比。</summary>
     [ObservableProperty] private double? humidity;
+    /// <summary>保存目前相對濕度的顯示文字。</summary>
     [ObservableProperty] private string humidityText = Missing;
+    /// <summary>保存目前濕度與昨日同一當地小時濕度的百分點差。</summary>
     [ObservableProperty] private string humidityDifference = Missing;
+    /// <summary>保存依設定單位格式化的目前氣溫。</summary>
     [ObservableProperty] private string temperature = Missing;
+    /// <summary>保存最近逐時預報的露點溫度顯示文字。</summary>
     [ObservableProperty] private string dewPoint = Missing;
+    /// <summary>保存昨日最高溫的顯示文字。</summary>
     [ObservableProperty] private string yesterdayHigh = Missing;
+    /// <summary>保存目前體感溫度的顯示文字。</summary>
     [ObservableProperty] private string feelsLike = Missing;
+    /// <summary>保存日照弧線起始角度。</summary>
     [ObservableProperty] private double sunStart;
+    /// <summary>保存日照弧線涵蓋的角度。</summary>
     [ObservableProperty] private double sunSweep;
+    /// <summary>保存日照週期已經過的比例，資料不足時為 null。</summary>
     [ObservableProperty] private double? sunProgress;
+    /// <summary>保存日照時長的本地化顯示文字。</summary>
     [ObservableProperty] private string daylight = Missing;
+    /// <summary>保存日出時間的本地化顯示文字。</summary>
     [ObservableProperty] private string sunrise = Missing;
+    /// <summary>保存日落時間的本地化顯示文字。</summary>
     [ObservableProperty] private string sunset = Missing;
+    /// <summary>保存目前焦點預報項目；尚無含天氣代碼的項目時為 null。</summary>
     [ObservableProperty] private ForecastTile? focusForecast;
+    /// <summary>保存目前天氣代碼，供狀況文字與圖示使用。</summary>
     [ObservableProperty] private int? currentCode;
+    /// <summary>保存目前時段是否為白天的資料。</summary>
     [ObservableProperty] private bool? currentIsDay;
 
+    /// <summary>套用位置、單位與語言偏好；位置改變時清除舊天氣資料。</summary>
     public void Configure(AppSettings preferences)
     {
         var newLocation = settings.Location != preferences.Location;
@@ -91,6 +132,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         UpdateStatus();
     }
 
+    /// <summary>更新最小化狀態，並在還原時重新整理儀表板內容。</summary>
     public void SetMinimized(bool value)
     {
         minimized = value;
@@ -99,6 +141,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
             Display();
     }
 
+    /// <summary>建立更新取消來源並啟動初次及定期天氣更新；重複呼叫不會另建工作。</summary>
     public void Start()
     {
         if (lifetime is not null)
@@ -109,6 +152,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         RefreshCommand.NotifyCanExecuteChanged();
     }
 
+    /// <summary>取消更新工作並等待它們結束，然後清除生命週期狀態。</summary>
     public async Task StopAsync()
     {
         if (lifetime is not { } active)
@@ -122,6 +166,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         catch (OperationCanceledException) when (active.IsCancellationRequested)
         {
             // Navigation canceled the current refresh.
+            // 切換頁面或關閉應用程式時，取消目前的天氣更新工作。
         }
         finally
         {
@@ -135,6 +180,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         }
     }
 
+    /// <summary>沒有快照時先載入快取，之後立即更新並以 15 分鐘週期重複更新。</summary>
     private async Task RunAsync(CancellationToken cancellationToken)
     {
         if (weather is null)
@@ -153,8 +199,10 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
             await GetRefresh(cancellationToken);
     }
 
+    /// <summary>僅在儀表板更新生命週期仍有效時允許執行手動更新命令。</summary>
     private bool CanRefresh() => lifetime is { IsCancellationRequested: false };
 
+    /// <summary>使用目前生命週期的取消權杖執行或共用更新工作。</summary>
     [RelayCommand(CanExecute = nameof(CanRefresh))]
     private async Task RefreshAsync()
     {
@@ -168,9 +216,11 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
             // The current dashboard was closed.
+            // 儀表板工作階段停止時，忽略更新命令的預期取消結果。
         }
     }
 
+    /// <summary>重用尚未完成的更新工作，否則建立新的單次更新工作。</summary>
     private Task GetRefresh(CancellationToken token)
     {
         if (pendingRefresh is null || pendingRefresh.IsCompleted)
@@ -178,6 +228,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         return pendingRefresh;
     }
 
+    /// <summary>更新連線與錯誤狀態，並只接受時間不早於目前快照的新快照。</summary>
     private async Task RefreshOnceAsync(CancellationToken cancellationToken)
     {
         updating = true;
@@ -199,6 +250,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         }
     }
 
+    /// <summary>替換目前快照與時區，並重新整理畫面及狀態文字。</summary>
     private void DisplaySnapshot(WeatherSnapshot snapshot)
     {
         weather = snapshot;
@@ -207,6 +259,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         UpdateStatus();
     }
 
+    /// <summary>通知繫結更新連線狀態、狀態細節與最後更新時間。</summary>
     private void UpdateStatus()
     {
         OnPropertyChanged(nameof(StatusText));
@@ -214,6 +267,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         OnPropertyChanged(nameof(LastUpdated));
     }
 
+    /// <summary>每分鐘檢查時鐘；活動中的儀表板更新全部顯示，其他狀態只更新日期與時間。</summary>
     public void Tick()
     {
         var now = clock.GetUtcNow();
@@ -226,6 +280,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
             DisplayClock(now);
     }
 
+    /// <summary>將目前時間轉為地點時區，更新分鐘邊界、時鐘及本地日期。</summary>
     private void DisplayClock(DateTimeOffset now)
     {
         displayMinute = now.AddTicks(-(now.Ticks % TimeSpan.TicksPerMinute));
@@ -234,6 +289,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         LocalDate = local.ToString(settings.TraditionalChinese ? "yyyy年M月d日 ddd" : "ddd, MMM d, yyyy", Text.Culture);
     }
 
+    /// <summary>從目前快照整理天氣、日照、濕度比較及預報顯示屬性。</summary>
     private void Display()
     {
         var now = clock.GetUtcNow();
@@ -287,6 +343,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         OnPropertyChanged(nameof(CurrentCondition));
     }
 
+    /// <summary>更新目前太陽輻射、紫外線與估計光照指標及今日輻射峰值。</summary>
     private void DisplaySun(DateOnly today, DailyForecast? daily, HourlyForecast? hour)
     {
         var peak = weather?.Hourly
@@ -301,6 +358,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         LightMetric.Display(Text.Light, light, Format(light, "0.0"), Text.Relative);
     }
 
+    /// <summary>以本地時間建立接下來五筆逐時預報，更新集合並選出第一筆有天氣代碼的項目。</summary>
     private void DisplayForecast(DateTimeOffset now)
     {
         var tiles = (weather?.Hourly ?? []).Where(hour => hour.Time > now).Take(5).Select(hour =>
@@ -331,6 +389,7 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         OnPropertyChanged(nameof(NoForecastVisibility));
     }
 
+    /// <summary>以地點時區格式化日出或日落時間，跨日期時附上月日。</summary>
     private string FormatSunTime(DateTimeOffset? time, DateOnly today)
     {
         if (time is null)
@@ -340,12 +399,15 @@ public sealed partial class DashboardViewModel(WeatherRefreshService refresh, We
         return local.ToString(format, Text.Culture);
     }
 
+    /// <summary>依目前介面文化格式化數值，值缺少時回傳佔位文字。</summary>
     private string Format(double? value, string pattern) => value?.ToString(pattern, Text.Culture) ?? Missing;
 
+    /// <summary>依溫度單位偏好格式化數值，缺少時回傳佔位文字。</summary>
     private string FormatTemperature(double? value) => value is { } temp
         ? $"{Format(WeatherMath.Temperature(temp, settings.Fahrenheit), "0")}{TemperatureUnit}"
         : Missing;
 
+    /// <summary>依風速單位偏好換算並格式化數值，缺少時回傳佔位文字。</summary>
     private string FormatWind(double? value) => value is { } wind
         ? Format(WeatherMath.WindSpeed(wind, settings.MilesPerHour), "0.0")
         : Missing;

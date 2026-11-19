@@ -3,8 +3,10 @@ using System.Text.Json;
 
 namespace AmbientWeatherDashboard.Core.Services;
 
+/// <summary>提供應用程式 JSON 檔案的非同步讀取與暫存檔寫入。</summary>
 internal static class AppFiles
 {
+    /// <summary>反序列化 JSON 檔案；檔案不存在時回傳 default，JSON、I/O 或權限錯誤會記錄警告後回傳 default。</summary>
     internal static async Task<T?> ReadAsync<T>(string path, CancellationToken cancellationToken)
     {
         try
@@ -24,6 +26,7 @@ internal static class AppFiles
         }
     }
 
+    /// <summary>將資料序列化至暫存檔，再覆寫目標檔並嘗試清除暫存檔。</summary>
     internal static async Task WriteAsync<T>(string path, T value, CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);

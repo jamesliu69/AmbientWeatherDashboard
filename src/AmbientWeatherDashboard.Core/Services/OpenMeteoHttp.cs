@@ -4,8 +4,10 @@ using System.Text.Json;
 
 namespace AmbientWeatherDashboard.Core.Services;
 
+/// <summary>封裝 Open-Meteo JSON HTTP 請求的逾時、取消與暫時性錯誤重試。</summary>
 internal static class OpenMeteoHttp
 {
+    /// <summary>取得並解析 JSON 回應，對暫時性 HTTP、讀取中斷及請求逾時進行延遲重試。</summary>
     internal static async Task<JsonElement> GetJsonAsync(HttpClient client, string url, CancellationToken cancellationToken)
     {
         for (var attempt = 0; ; attempt++)
@@ -47,6 +49,7 @@ internal static class OpenMeteoHttp
         }
     }
 
+    /// <summary>判定無狀態碼、408、429 與 5xx 狀態碼是否可重試。</summary>
     private static bool IsTransient(HttpStatusCode? status) => status is null or HttpStatusCode.RequestTimeout
         or HttpStatusCode.TooManyRequests || (int?)status >= 500;
 }
