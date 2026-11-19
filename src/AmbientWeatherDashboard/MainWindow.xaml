@@ -1,0 +1,79 @@
+<Window x:Class="AmbientWeatherDashboard.MainWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+ xmlns:views="clr-namespace:AmbientWeatherDashboard.Views"
+ xmlns:vm="clr-namespace:AmbientWeatherDashboard.ViewModels"
+ Title="Ambient Weather Dashboard" Width="1600" Height="960" MinWidth="1280" MinHeight="760"
+ WindowStyle="None" ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
+ Background="{StaticResource WindowBackground}" FontFamily="Segoe UI, Microsoft JhengHei"
+ FontSize="15" UseLayoutRounding="True" SnapsToDevicePixels="True">
+  <shell:WindowChrome.WindowChrome>
+    <shell:WindowChrome CaptionHeight="42" ResizeBorderThickness="7" GlassFrameThickness="0"
+                         CornerRadius="0" UseAeroCaptionButtons="False"/>
+  </shell:WindowChrome.WindowChrome>
+  <Window.InputBindings>
+    <KeyBinding Key="F5" Command="{Binding Dashboard.RefreshCommand}"/>
+  </Window.InputBindings>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="44"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="72"/>
+    </Grid.RowDefinitions>
+    <DockPanel Background="#0A142D">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,8,0">
+        <TextBlock Text="{Binding Dashboard.LocalDate}" VerticalAlignment="Center" Margin="0,0,16,0" Style="{StaticResource Caption}"/>
+        <Button Content="−" Style="{StaticResource ChromeButton}" shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                Click="MinimizeClick" ToolTip="{Binding Text.Minimize}" AutomationProperties.Name="{Binding Text.Minimize}"/>
+        <Button x:Name="MaximizeButton" Content="□" Style="{StaticResource ChromeButton}" shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                Click="MaximizeClick" ToolTip="{Binding Text.Maximize}" AutomationProperties.Name="{Binding Text.Maximize}"/>
+        <Button Content="×" Style="{StaticResource ChromeButton}" shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                Click="CloseClick" ToolTip="{Binding Text.Close}" AutomationProperties.Name="{Binding Text.Close}"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Margin="24,0" VerticalAlignment="Center" HorizontalAlignment="Left" ClipToBounds="True"
+        shell:WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="{Binding Dashboard.StatusDetail}">
+        <Path Data="M4,17 H18 A4,4 0 0 0 18,9 H16 A6,6 0 0 0 5,9 A4,4 0 0 0 4,17 Z"
+          Width="19" Height="15" Stretch="Uniform" Stroke="{StaticResource Blue}" StrokeThickness="1.7"
+          Margin="0,0,10,0" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding Dashboard.StatusText}" Foreground="{StaticResource Cyan}" AutomationProperties.LiveSetting="Polite"/>
+        <TextBlock Text="{Binding Dashboard.City}" Margin="16,0,0,0" FontWeight="SemiBold" MaxWidth="200" TextTrimming="CharacterEllipsis"/>
+        <TextBlock Text="{Binding Dashboard.LastUpdated}" Margin="15,0,0,0" Visibility="{Binding DashboardVisibility}"
+          Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+      </StackPanel>
+    </DockPanel>
+    <Grid Grid.Row="1">
+      <ScrollViewer Visibility="{Binding DashboardVisibility}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+        <views:DashboardView DataContext="{Binding Dashboard}" Margin="30,31,30,21" MinWidth="1138" MinHeight="575"/>
+      </ScrollViewer>
+      <ScrollViewer Visibility="{Binding HomeVisibility}" VerticalScrollBarVisibility="Auto">
+        <views:HomeView/>
+      </ScrollViewer>
+      <ScrollViewer Visibility="{Binding SettingsVisibility}" VerticalScrollBarVisibility="Auto">
+        <views:SettingsView/>
+      </ScrollViewer>
+    </Grid>
+    <DockPanel Grid.Row="2" Margin="34,0" LastChildFill="False">
+      <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" HorizontalAlignment="Right">
+        <TextBlock Text="Ambient Weather Dashboard" HorizontalAlignment="Right"/>
+        <TextBlock Text="{Binding Text.Source}" Style="{StaticResource Caption}" HorizontalAlignment="Right"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:Page.Home}" Visibility="{Binding DashboardVisibility}"
+          Style="{StaticResource MinorButton}" Margin="0,0,10,0">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="←" Margin="0,0,10,0"/>
+            <TextBlock Text="{Binding Text.Home}"/>
+          </StackPanel>
+        </Button>
+        <Button Content="{Binding Text.Refresh}" Command="{Binding Dashboard.RefreshCommand}" Visibility="{Binding DashboardVisibility}"
+          Style="{StaticResource MinorButton}" Margin="0,0,10,0"/>
+        <Button Content="{Binding Text.Settings}" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:Page.Settings}"
+          Visibility="{Binding SettingsShortcutVisibility}" Style="{StaticResource MinorButton}"/>
+        <TextBlock Text="{Binding Error}" Foreground="{StaticResource Gold}" ToolTip="{Binding ErrorDetail}"
+          Margin="14,0,0,0" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+      </StackPanel>
+    </DockPanel>
+  </Grid>
+</Window>

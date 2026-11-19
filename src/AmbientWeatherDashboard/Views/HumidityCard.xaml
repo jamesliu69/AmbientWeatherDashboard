@@ -1,0 +1,21 @@
+<UserControl x:Class="AmbientWeatherDashboard.Views.HumidityCard"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ mc:Ignorable="d"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:controls="clr-namespace:AmbientWeatherDashboard.Controls"
+ HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+  <controls:WeatherCard Title="{Binding Text.HumidityTitle, FallbackValue='HUMIDITY'}" Glyph="M12,2 C10,7 5,11 5,15 A7,7 0 0 0 19,15 C19,11 14,7 12,2 Z"
+    Animate="{Binding Motion}" Detail="{Binding Text.HumidityTip}">
+    <Grid>
+      <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <controls:CircularGaugeControl Value="{Binding Humidity}" d:Value="70" d:Readout="70%" Readout="{Binding HumidityText, FallbackValue=—}" Animate="{Binding Motion}"
+        AutomationProperties.Name="{Binding HumidityText}" Margin="2,0,2,7"/>
+      <StackPanel Grid.Row="1" Margin="9,1,9,6">
+        <TextBlock Text="{Binding HumidityDifference}" Foreground="{StaticResource Cyan}" FontWeight="SemiBold" Height="43"/>
+        <TextBlock Text="{Binding Text.YesterdaySameHour}" Style="{StaticResource Caption}" FontSize="12"/>
+      </StackPanel>
+    </Grid>
+  </controls:WeatherCard>
+</UserControl>

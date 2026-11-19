@@ -1,0 +1,36 @@
+<UserControl x:Class="AmbientWeatherDashboard.Views.ForecastCard"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ mc:Ignorable="d"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:controls="clr-namespace:AmbientWeatherDashboard.Controls"
+ HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+  <controls:WeatherCard Title="{Binding Text.ForecastTitle, FallbackValue='FORECAST'}" Glyph="M12,3 A9,9 0 1 1 11.99,3 M12,6 L12,12 16,14"
+    Animate="{Binding Motion}" Detail="{Binding Text.ForecastTip}">
+    <Grid>
+      <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <controls:WeatherIconControl Code="{Binding FocusForecast.Code}" IsDay="{Binding FocusForecast.IsDay}" IsWindy="{Binding FocusForecast.IsWindy}"
+        Animate="{Binding Motion}" d:Code="3" MaxWidth="270" Margin="0,2,0,5" AutomationProperties.Name="{Binding FocusForecast.Caption}"/>
+      <Grid Grid.Row="1" Margin="0,0,0,13">
+        <TextBlock Text="{Binding Text.NoForecast}" Style="{StaticResource Caption}" HorizontalAlignment="Center" VerticalAlignment="Center"
+          Visibility="{Binding NoForecastVisibility}"/>
+        <ItemsControl ItemsSource="{Binding Forecast}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><UniformGrid Columns="5"/></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,1,0,0" ToolTip="{Binding Caption}">
+                <TextBlock Text="{Binding Time}" Style="{StaticResource Caption}" FontSize="13" HorizontalAlignment="Center"/>
+                <controls:WeatherIconControl Code="{Binding Code}" IsDay="{Binding IsDay}" IsWindy="{Binding IsWindy}" Height="46" Margin="0,5"
+                  AutomationProperties.Name="{Binding Caption}"/>
+                <TextBlock Text="{Binding Temperature}" HorizontalAlignment="Center" FontWeight="SemiBold"/>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Grid>
+    </Grid>
+  </controls:WeatherCard>
+</UserControl>

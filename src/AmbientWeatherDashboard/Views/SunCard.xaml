@@ -1,0 +1,39 @@
+<UserControl x:Class="AmbientWeatherDashboard.Views.SunCard"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:controls="clr-namespace:AmbientWeatherDashboard.Controls"
+ HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+  <controls:WeatherCard Title="{Binding Text.SunTitle, FallbackValue='SUN'}" Glyph="M12,8 A4,4 0 1 1 11.99,8 M12,2 V5 M12,19 V22 M2,12 H5 M19,12 H22 M5,5 L7,7 M17,17 L19,19 M5,19 L7,17 M17,7 L19,5"
+    Animate="{Binding Motion}" Detail="{Binding Text.SunTip}">
+    <Grid Margin="8,0,7,0">
+      <Grid.Resources>
+        <Style TargetType="ContentControl">
+          <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+          <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        </Style>
+        <DataTemplate x:Key="SunMetric">
+          <Grid Margin="0,7">
+            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+            <TextBlock Text="{Binding Title}" Style="{StaticResource Caption}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+            <Grid Grid.Row="1" Margin="4,7,0,1">
+              <Grid.ColumnDefinitions><ColumnDefinition Width="34*"/><ColumnDefinition Width="66*"/></Grid.ColumnDefinitions>
+              <controls:VerticalSegmentGaugeControl Value="{Binding Value}" Maximum="{Binding Maximum}" Accent="{Binding AccentBrush}"
+                Unit="{Binding Unit}" Animate="{Binding DataContext.Motion, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Margin="2,0,14,0" MaxHeight="135"
+                AutomationProperties.HelpText="{Binding Unit, RelativeSource={RelativeSource Self}}" AutomationProperties.Name="{Binding Accessible}"/>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Unit}" Style="{StaticResource Caption}" FontSize="12" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding Readout}" FontSize="45" FontWeight="Light" Foreground="{Binding AccentBrush}"/>
+                <TextBlock Text="{Binding Detail}" Style="{StaticResource Caption}" FontSize="13" TextWrapping="Wrap"/>
+              </StackPanel>
+            </Grid>
+          </Grid>
+        </DataTemplate>
+      </Grid.Resources>
+      <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+      <ContentControl ContentTemplate="{StaticResource SunMetric}" Content="{Binding SolarMetric}"/>
+      <ContentControl Grid.Row="1" ContentTemplate="{StaticResource SunMetric}" Content="{Binding UvMetric}"/>
+      <ContentControl Grid.Row="2" ContentTemplate="{StaticResource SunMetric}" Content="{Binding LightMetric}"/>
+    </Grid>
+  </controls:WeatherCard>
+</UserControl>

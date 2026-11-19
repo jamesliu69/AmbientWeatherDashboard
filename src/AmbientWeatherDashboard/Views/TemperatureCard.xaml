@@ -1,0 +1,38 @@
+<UserControl x:Class="AmbientWeatherDashboard.Views.TemperatureCard"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ mc:Ignorable="d"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:controls="clr-namespace:AmbientWeatherDashboard.Controls"
+ HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+  <controls:WeatherCard Title="{Binding Text.TemperatureTitle, FallbackValue='TEMPERATURE'}" Glyph="M9,14 V5 A3,3 0 0 1 15,5 V14 A5,5 0 1 1 9,14 Z M12,7 V17"
+    Animate="{Binding Motion}" Detail="{Binding Text.TemperatureTip}">
+    <Grid>
+      <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <Viewbox Margin="0,0,0,3" StretchDirection="DownOnly">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="{Binding Temperature, FallbackValue=—}" d:Text="23°" FontSize="77" FontWeight="Light"
+            AutomationProperties.Name="{Binding TemperatureAccessible}"/>
+          <TextBlock Text="{Binding TemperatureScale}" Style="{StaticResource Caption}" FontSize="21"
+            VerticalAlignment="Center" Margin="1,8,0,0"/>
+        </StackPanel>
+      </Viewbox>
+      <Grid Grid.Row="1" Margin="1,0,1,13">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition/><ColumnDefinition Width="1"/><ColumnDefinition/><ColumnDefinition Width="1"/><ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <TextBlock Text="{Binding Text.DewPoint}" Style="{StaticResource Caption}" FontSize="11" TextAlignment="Center" TextWrapping="Wrap"/>
+        <TextBlock Text="{Binding DewPoint}" Grid.Row="1" HorizontalAlignment="Center"/>
+        <Line Grid.Column="1" Grid.RowSpan="2" Y2="36" Stroke="{StaticResource Divider}" StrokeThickness="1" StrokeDashArray="2 3"/>
+        <TextBlock Grid.Column="2" Text="{Binding Text.YesterdayHigh}" Style="{StaticResource Caption}" FontSize="11"
+          TextAlignment="Center" TextWrapping="Wrap" Margin="2,0"/>
+        <TextBlock Text="{Binding YesterdayHigh}" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center"/>
+        <Line Grid.Column="3" Grid.RowSpan="2" Y2="36" Stroke="{StaticResource Divider}" StrokeThickness="1" StrokeDashArray="2 3"/>
+        <TextBlock Grid.Column="4" Text="{Binding Text.FeelsLike}" Style="{StaticResource Caption}" FontSize="11" TextAlignment="Center" TextWrapping="Wrap"/>
+        <TextBlock Text="{Binding FeelsLike}" Grid.Row="1" Grid.Column="4" HorizontalAlignment="Center"/>
+      </Grid>
+    </Grid>
+  </controls:WeatherCard>
+</UserControl>

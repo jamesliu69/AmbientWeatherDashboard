@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <SolidColorBrush x:Key="PrimaryText" Color="#F5F9FF" />
+  <SolidColorBrush x:Key="SecondaryText" Color="#9AB3C8" />
+  <SolidColorBrush x:Key="Cyan" Color="#87E0D3" />
+  <SolidColorBrush x:Key="Gold" Color="#FFC72B" />
+  <SolidColorBrush x:Key="Blue" Color="#9BD5FF" />
+  <SolidColorBrush x:Key="Purple" Color="#AC73F3" />
+  <SolidColorBrush x:Key="Divider" Color="#25435A" />
+  <LinearGradientBrush x:Key="WindowBackground" StartPoint="0.65,0" EndPoint="0.25,1">
+    <GradientStop Color="#0B2A46" Offset="0" />
+    <GradientStop Color="#081B34" Offset="0.46" />
+    <GradientStop Color="#080F2B" Offset="1" />
+  </LinearGradientBrush>
+  <LinearGradientBrush x:Key="CardBackground" StartPoint="0,0.62" EndPoint="1,0">
+    <GradientStop Color="#09192F" Offset="0" />
+    <GradientStop Color="#09233A" Offset="0.68" />
+    <GradientStop Color="#0B2A42" Offset="1" />
+  </LinearGradientBrush>
+  <LinearGradientBrush x:Key="CardEdge" StartPoint="0,0" EndPoint="1,1">
+    <GradientStop Color="#365971" Offset="0" />
+    <GradientStop Color="#19354D" Offset="0.5" />
+    <GradientStop Color="#2A4C63" Offset="1" />
+  </LinearGradientBrush>
+</ResourceDictionary>

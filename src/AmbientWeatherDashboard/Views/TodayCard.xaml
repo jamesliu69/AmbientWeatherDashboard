@@ -1,0 +1,20 @@
+<UserControl x:Class="AmbientWeatherDashboard.Views.TodayCard"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ mc:Ignorable="d"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:controls="clr-namespace:AmbientWeatherDashboard.Controls"
+ HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+  <controls:WeatherCard Title="{Binding Text.TodayTitle, FallbackValue='TODAY'}" Glyph="M12,3 A9,9 0 1 1 11.99,3 M12,6 L12,12 16,14"
+    Animate="{Binding Motion}" Detail="{Binding Text.TodayTip}">
+    <Grid>
+      <Grid.ColumnDefinitions><ColumnDefinition Width="1.65*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+      <Viewbox StretchDirection="DownOnly" Margin="5,0,0,0">
+        <TextBlock Text="{Binding ClockText, FallbackValue='--:--'}" d:Text="19:14" FontSize="77" FontWeight="SemiBold"/>
+      </Viewbox>
+      <controls:WeatherIconControl Grid.Column="1" Margin="0,2,0,1" Code="{Binding CurrentCode}"
+        d:Code="2" d:IsDay="False" IsDay="{Binding CurrentIsDay}" Animate="{Binding Motion}" AutomationProperties.Name="{Binding CurrentCondition}"/>
+    </Grid>
+  </controls:WeatherCard>
+</UserControl>
